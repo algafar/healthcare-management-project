@@ -3,7 +3,7 @@ from sqlalchemy import String,Integer,ForeignKey,Date,DateTime, Text
 from app.database import Base
 
 
-class Doctor(Base):
+class Doctor(Base): 
     __tablename__ = "doctors"
 
     doctor_id: Mapped[int] = mapped_column(primary_key = True)
