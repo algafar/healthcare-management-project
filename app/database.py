@@ -1,5 +1,5 @@
 from urllib.parse import quote_plus
-from sqlalchemy import create_engine,text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import sessionmaker
 from app.config import setting

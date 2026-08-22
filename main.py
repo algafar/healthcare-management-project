@@ -1,20 +1,11 @@
-from fastapi import FastAPI,Depends
-from app.database import engine, Base, get_db
-from model import Doctor
-from crud import createdoctor, view_doctors
-from sqlalchemy.orm import Session
-from schemas import DoctorCreate,DoctorResponse
+from fastapi import FastAPI
+from app.database import engine, Base
+from routers.doctors import router as doctors_router
 
 
 Base.metadata.create_all(engine)
-app = FastAPI()
+app = FastAPI(title="Healthcare Management System")
+app.include_router(doctors_router)
 
 
-@app.post('/doctor/', response_model= DoctorResponse )
-def add_doctor(new_doctor:DoctorCreate,db:Session = Depends(get_db)):
-    return createdoctor(session=db,doctor = new_doctor)
- 
-@app.get('/doctors/',response_model= list[DoctorResponse])
-def get_doctors(db:Session = Depends(get_db)):
-    return view_doctors(session=db)
 
