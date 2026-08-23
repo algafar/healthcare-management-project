@@ -41,11 +41,15 @@ def setup_test_database():
 
 @pytest.fixture
 def db_session():
-    session = TestingSessionLocal()
+    connection = TEST_ENGINE.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind = connection)
     try:
         yield session
     finally:
         session.close()
+        transaction.rollback()
+        connection.close()
    
 
 @pytest.fixture

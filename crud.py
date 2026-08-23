@@ -12,11 +12,11 @@ class Manager:
         session.refresh(db_doctor)
         return db_doctor
 
-    def view_doctors(session:Session):
+    def view_doctors(self,session:Session):
         return session.scalars(select(Doctor)).all()
 
     def get_doctor_by_id(session:Session,doctor_id: int):
-        return session.scalar(select(Doctor)).where(Doctor.doctor_id == doctor_id)
+        return session.scalar(select(Doctor).where(Doctor.doctor_id == doctor_id))
 
     #Patient
     def createpatient(patient:PatientCreate, session:Session):
