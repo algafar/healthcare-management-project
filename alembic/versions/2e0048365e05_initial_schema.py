@@ -1,8 +1,8 @@
-"""Initial 
+"""initial_schema
 
-Revision ID: 181f192290d7
+Revision ID: 2e0048365e05
 Revises: 
-Create Date: 2026-08-14 16:51:36.601276
+Create Date: 2026-08-29 12:33:03.324164
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '181f192290d7'
+revision: str = '2e0048365e05'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -48,6 +48,7 @@ def upgrade() -> None:
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('specialty_id', sa.Integer(), nullable=False),
     sa.Column('role', sa.Enum('ADMIN', 'DOCTOR', 'PATIENT', name='role', native_enum=False), nullable=False),
+    sa.Column('duty', sa.Enum('OFF_DUTY', 'ACTIVE', name='duty', native_enum=False), nullable=True),
     sa.ForeignKeyConstraint(['specialty_id'], ['specialties.id'], ),
     sa.PrimaryKeyConstraint('doctor_id'),
     sa.UniqueConstraint('email'),
@@ -56,13 +57,16 @@ def upgrade() -> None:
     op.create_table('appointments',
     sa.Column('appointment_id', sa.Integer(), nullable=False),
     sa.Column('patient_id', sa.Integer(), nullable=False),
-    sa.Column('doctor_id', sa.Integer(), nullable=False),
+    sa.Column('reasons', sa.Text(), nullable=False),
+    sa.Column('doctor_id', sa.Integer(), nullable=True),
     sa.Column('appointment_date', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('date', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('requested_date', sa.Date(), nullable=False),
     sa.Column('status', sa.Enum('SCHDULED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'PENDING', name='status', native_enum=False), nullable=False),
+    sa.Column('date', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['doctor_id'], ['doctors.doctor_id'], ),
     sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
-    sa.PrimaryKeyConstraint('appointment_id')
+    sa.PrimaryKeyConstraint('appointment_id'),
+    sa.UniqueConstraint('doctor_id', 'appointment_date', name='uq_doctor_appointment_date')
     )
     op.create_table('invoices',
     sa.Column('invoice_id', sa.Integer(), nullable=False),

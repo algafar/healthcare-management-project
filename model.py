@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String,ForeignKey,Integer,Text
 from app.database import Base
 from enum import Enum as PyEnum
-from sqlalchemy import Enum
+from sqlalchemy import Enum,UniqueConstraint
 from sqlalchemy import Numeric
 
 
@@ -81,14 +81,14 @@ class Patient(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key = True)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    dob:Mapped[date]= mapped_column(Date)
+    dob: Mapped[date]= mapped_column(Date)
     address: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     phone_number: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     gender: Mapped[Gender] = mapped_column(Enum(Gender), nullable=False)
     role: Mapped[Role] = mapped_column(Enum(Role, native_enum=False), default= Role.PATIENT)
 
-    medicalrecords:  Mapped[list["MedicalRecord"]] = relationship(
+    medicalrecords: Mapped[list["MedicalRecord"]] = relationship(
         back_populates="patients"
     )
     appointments: Mapped[list["Appointment"]] = relationship(
@@ -102,17 +102,21 @@ class Appointment(Base):
     __tablename__ = "appointments"
 
     appointment_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    reasons: Mapped[str] = mapped_column(Text, nullable=False)
     patient_id: Mapped[int] = mapped_column(Integer, ForeignKey("patients.id"))
-    doctor_id: Mapped[int] = mapped_column(Integer, ForeignKey("doctors.doctor_id"))
+    reasons: Mapped[str] = mapped_column(Text, nullable=False)
+    doctor_id: Mapped[int] = mapped_column(Integer, ForeignKey("doctors.doctor_id"),nullable=True)
     appointment_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
-    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     requested_date: Mapped[date] = mapped_column(Date, nullable=False)
     status: Mapped[Status] = mapped_column(Enum(Status, native_enum=False), default=Status.PENDING)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__= (
+        UniqueConstraint("doctor_id","appointment_date",name="uq_doctor_appointment_date"),
+    )
 
     patients: Mapped["Patient"] = relationship(
         back_populates="appointments"
-    )
+    ) 
     doctors: Mapped["Doctor"] = relationship(
         back_populates="appointments"
     )
