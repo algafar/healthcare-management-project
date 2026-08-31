@@ -30,7 +30,7 @@ def update_patient_appointments(appointment_id:int,appointment_in:ReceptionistUp
     update_appointment = manager.update_patch_appointments(db,appointment_id,appointment_in)
     if not update_appointment:
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail=f"Appointment with id {appointment_id} not found")
-    manager.update_appointment_status(db,appointment_id)
+    manager.schedule_appointment_status(db,appointment_id)
     
     return update_appointment
     

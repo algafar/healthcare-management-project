@@ -56,6 +56,9 @@ class Manager:
     def view_appointments(self,session:Session):
         return session.scalars(select(Appointment)).all()
 
+    def appointment(self,session:Session,appointment_id):
+        return session.scalars(select(Appointment).where(Appointment.appointment_id==appointment_id)).first()
+    
     def get_appointments_by_id(self,session:Session,appointment_id: int):
         return session.scalar(select(Appointment).where(Appointment.appointment_id == appointment_id))
 
@@ -83,14 +86,21 @@ class Manager:
         appointment_id = session.scalars(select(Appointment.appointment_date).where(Appointment.patient_id==patient_id,Appointment.status == status))
         return appointment_id
 
-    def update_appointment_status(self,session:Session,appointment_id):
+    def schedule_appointment_status(self,session:Session,appointment_id):
         stmt = (
             update(Appointment).where(Appointment.appointment_id == appointment_id).values(status="scheduled")
         )
         session.execute(stmt)
         session.commit()
     
+    def complete_appointment_status(self,session:Session,appointment_id):
+            stmt = (
+                update(Appointment).where(Appointment.appointment_id == appointment_id).values(status="completed")
+            )
+            session.execute(stmt)
+            session.commit()
         
+                
     def calculate_available_15_minutes(self,doctor_id:int,date_str:str,session:Session,work_hour: int =9,end_hour: int =15)-> List[datetime]:
         #generate timestamp based on work period 
         day = datetime.strptime(date_str, "%Y-%m-%d")
@@ -110,11 +120,10 @@ class Manager:
 
     #Medicalrecord
     def create_medicalrecord(self,medicalrecord:MedicalRecordCreate, session:Session):
-        db_medicalrecord = MedicalRecord(**medicalrecord.model_dump())
-        session.add(db_medicalrecord)
+        session.add(medicalrecord)
         session.commit()
-        session.refresh(db_medicalrecord)
-        return db_medicalrecord
+        session.refresh(medicalrecord)
+        return medicalrecord
 
     def view_medicalrecord(self,session:Session):
         return session.scalars(select(MedicalRecord)).all()
@@ -124,17 +133,18 @@ class Manager:
 
     #invoices
     def create_invoices(self,invoice:InvoiceCreate, session:Session):
-        db_invoice = Invoice(**invoice.model_dump())
-        session.add(db_invoice)
+        session.add(invoice)
         session.commit()
-        session.refresh(db_invoice)
-        return db_invoice
+        session.refresh(invoice)
+        return invoice
 
     def view_invoice(self,session:Session):
         return session.scalars(select(MedicalRecord)).all()
 
     def get_invoice_by_id(self,session:Session,invoice_id: int):
         return session.scalar(select(Invoice).where(Invoice.invoice_id== invoice_id))
+
+
 
     #Specialties
     def create_specialty(self,specialty:Specialty, session:Session):

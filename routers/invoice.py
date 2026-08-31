@@ -5,13 +5,28 @@ from sqlalchemy.orm import Session
 from schemas import InvoiceCreate,InvoiceResponse
 from typing import List
 from fastapi import HTTPException
-
+from model import Invoice
 router = APIRouter(prefix="/invoices", tags=["Invoice"])
 manager = Manager()
 
 @router.post("/", response_model=InvoiceResponse, status_code=status.HTTP_201_CREATED)
 def add_invoice(new_invoice:InvoiceCreate,db:Session = Depends(get_db)):
-    return manager.create_invoices(new_invoice, db)
+    appointment = manager.appointment(db,new_invoice.appointment_id)
+    if not appointment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"
+        )
+    if appointment.status != "completed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail = "Invoice can only be created for completed appointment"
+        )
+    amount = new_invoice.total_amount
+    invoice_in = Invoice(
+        patient_id = appointment.patient_id,
+        appointment_id = appointment.appointment_id,
+        total_amount = amount)
+    return manager.create_invoices(invoice_in,db)
+
 
 @router.get("/", response_model=List[InvoiceResponse], status_code=status.HTTP_200_OK)
 def get_invoices(db:Session = Depends(get_db)):

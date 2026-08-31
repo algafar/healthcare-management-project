@@ -14,27 +14,28 @@ async def test_create_medicalrecord(client,db_session):
     db_session.add(doctors)
     db_session.flush()
     db_session.refresh(doctors) 
-    appointments = Appointment(doctor_id=doctors.doctor_id,patient_id=patients.id,appointment_date="2026-08-21T14:30:00",date="2026-08-20",status= "pending",reasons= "headeache",
+    appointments = Appointment(doctor_id=doctors.doctor_id,patient_id=patients.id,appointment_date="2026-08-21T14:30:00",date="2026-08-20",status= "scheduled",reasons= "headeache",
                        requested_date= "2026-08-20")
     db_session.add(appointments)
     db_session.flush()
     db_session.refresh(appointments) 
     payload = {
-        "doctor_id": doctors.doctor_id,
-        "patient_id": patients.id,
+        "doctor_id": appointments.doctor_id,
+        "patient_id": appointments.patient_id,
         "appointment_id": appointments.appointment_id,
         "symptoms": "headache",
         "diagnosis": "migrane",
         "prescription": "paracetamol",
-        "date": "2026-08-28"
+        
     }
     response = await client.post("/medicalrecords/", json=payload)
     assert response.status_code==201
     data = response.json()
-    assert data["doctor_id"] ==doctors.doctor_id
-    assert data["patient_id"] ==patients.id
+    print(appointments.status)
+    assert data["doctor_id"] ==appointments.doctor_id
+    assert data["patient_id"] ==appointments.patient_id
     assert data["appointment_id"] ==appointments.appointment_id
     assert data["symptoms"] =="headache"
     assert data["diagnosis"] =="migrane"
     assert data["prescription"] =="paracetamol"
-    assert data["date"] =="2026-08-28"
+    

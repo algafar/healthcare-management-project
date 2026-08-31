@@ -67,7 +67,6 @@ class Available_slotResponse(BaseModel):
     available_slots: List[datetime]
 
 class InvoiceCreate(BaseModel):
-    patient_id: int
     appointment_id: int
     total_amount: Decimal
     
@@ -82,13 +81,11 @@ class InvoiceResponse(BaseModel):
     date: datetime
 
 class MedicalRecordCreate(BaseModel):
-    doctor_id: int
-    patient_id: int
     appointment_id: int
     symptoms: str
     diagnosis: str
     prescription: str
-    date: date
+
 
 class MedicalRecordResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -98,7 +95,7 @@ class MedicalRecordResponse(BaseModel):
     symptoms: str
     diagnosis: str
     prescription: str
-    date: date
+    date: datetime
 
 class PaymentCreate(BaseModel):
     invoice_id: int
@@ -139,7 +136,7 @@ class ReceptionistUpdate(BaseModel):
         current_friday_end = current_monday + timedelta(days=4,hours=23,minutes=59,seconds=59)
         if not (current_monday <= value <= current_friday_end):
             raise ValueError("Appointment can only booked for the current week(Monday to friday).")
-        if value.weekday > 4:
+        if value.weekday() > 4:
             raise ValueError("Appointment cannot be booked on weekends")
         return value
     
@@ -150,7 +147,6 @@ class ReceptionistUpdate(BaseModel):
         if value < now:
             raise ValueError("Appointment cannot be book with past date")
         return value
-    
 class ReceptionistResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     appointment_id: int
