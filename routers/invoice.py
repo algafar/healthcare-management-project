@@ -12,6 +12,11 @@ manager = Manager()
 @router.post("/", response_model=InvoiceResponse, status_code=status.HTTP_201_CREATED)
 def add_invoice(new_invoice:InvoiceCreate,db:Session = Depends(get_db)):
     appointment = manager.appointment(db,new_invoice.appointment_id)
+    existing_invoice = manager.get_invoice_by_appointment(db,new_invoice.appointment_id)
+    if existing_invoice:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="An invoice  has already been generted or th this appointment"
+        )
     if not appointment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found"

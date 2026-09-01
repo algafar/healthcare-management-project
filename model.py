@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String,ForeignKey,Integer,Text
 from app.database import Base
 from enum import Enum as PyEnum
-from sqlalchemy import Enum,UniqueConstraint
+from sqlalchemy import Enum,UniqueConstraint,CheckConstraint
 from sqlalchemy import Numeric
 
 
@@ -155,10 +155,15 @@ class Invoice(Base):
     __tablename__ = "invoices"
     invoice_id: Mapped[int] = mapped_column(primary_key=True)
     patient_id: Mapped[int] = mapped_column(ForeignKey("patients.id"))
-    appointment_id: Mapped[int] = mapped_column(ForeignKey("appointments.appointment_id"))
+    appointment_id: Mapped[int] = mapped_column(ForeignKey("appointments.appointment_id"), nullable=False)
     total_amount: Mapped[float] = mapped_column(Numeric(10,2), nullable=False)
     status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus, native_enum=False), default=PaymentStatus.PENDING)
     date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()) 
+
+    __table_args__ = (
+        UniqueConstraint("appointment_id", name="uq_invoices_appointment_id"),
+        CheckConstraint("total_amount > 0", name="check_positive_invoice_amount"),
+    )
 
     patients: Mapped["Patient"] = relationship(
         back_populates="invoices"

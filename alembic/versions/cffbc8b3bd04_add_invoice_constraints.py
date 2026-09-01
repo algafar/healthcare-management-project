@@ -1,8 +1,8 @@
-"""initial_schema
+"""add invoice constraints
 
-Revision ID: 2e0048365e05
+Revision ID: cffbc8b3bd04
 Revises: 
-Create Date: 2026-08-29 12:33:03.324164
+Create Date: 2026-08-31 12:33:35.134812
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '2e0048365e05'
+revision: str = 'cffbc8b3bd04'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -75,9 +75,11 @@ def upgrade() -> None:
     sa.Column('total_amount', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('status', sa.Enum('PAID', 'PENDING', name='paymentstatus', native_enum=False), nullable=False),
     sa.Column('date', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.CheckConstraint('total_amount > 0', name='check_positive_invoice_amount'),
     sa.ForeignKeyConstraint(['appointment_id'], ['appointments.appointment_id'], ),
     sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
-    sa.PrimaryKeyConstraint('invoice_id')
+    sa.PrimaryKeyConstraint('invoice_id'),
+    sa.UniqueConstraint('appointment_id', name='uq_invoices_appointment_id')
     )
     op.create_table('medicalrecords',
     sa.Column('record_id', sa.Integer(), nullable=False),

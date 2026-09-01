@@ -86,6 +86,9 @@ class Manager:
         appointment_id = session.scalars(select(Appointment.appointment_date).where(Appointment.patient_id==patient_id,Appointment.status == status))
         return appointment_id
 
+    def get_invoice_by_appointment(self,session:Session,appointment_id):
+        return session.scalar(select(Invoice).where(Invoice.appointment_id == appointment_id))
+
     def schedule_appointment_status(self,session:Session,appointment_id):
         stmt = (
             update(Appointment).where(Appointment.appointment_id == appointment_id).values(status="scheduled")
