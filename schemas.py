@@ -157,3 +157,22 @@ class ReceptionistResponse(BaseModel):
     appointment_date: Optional[datetime] = None
     date: datetime
     status: str
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    user_id: int
+    email: EmailStr
+    role: str
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+

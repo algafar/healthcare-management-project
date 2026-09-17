@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from schemas import (DoctorCreate,PatientCreate,AppointmentCreate,InvoiceCreate,MedicalRecordCreate,PaymentCreate,SpecialtiesCreate,ReceptionistUpdate)
-from model import (Doctor,Patient,Appointment,Invoice,MedicalRecord,Payment,Specialty)
+from schemas import (DoctorCreate,PatientCreate,AppointmentCreate,InvoiceCreate,MedicalRecordCreate,PaymentCreate,SpecialtiesCreate,ReceptionistUpdate,UserCreate)
+from model import (Doctor,Patient,Appointment,Invoice,MedicalRecord,Payment,Specialty,Users)
 from sqlalchemy import select,func, update
 from fastapi import HTTPException,status
 from typing import List
@@ -20,6 +20,9 @@ class Manager:
 
     def get_doctor_by_id(self,session:Session,doctor_id: int):
         return session.scalar(select(Doctor).where(Doctor.doctor_id == doctor_id))
+
+    def get_doctors_by_email(self,email,session:Session):
+        return session.scalars(select(Doctor).where(Doctor.email==email)).first()    
 
     def delete_doctor(self,session:Session, doctor_id:int):
         return session.delete(select(Doctor).where(Doctor.doctor_id == doctor_id))
@@ -45,6 +48,8 @@ class Manager:
     def get_patient_by_id(self,session:Session,id: int):
         return session.scalar(select(Patient).where(Patient.id == id))
 
+    def get_patient_by_email(self,email,session:Session):
+        return session.scalars(select(Patient).where(Patient.email==email)).first()
     #Appointment
     def createappointment(self,appointment:AppointmentCreate, session:Session):
         db_appointment = Appointment(**appointment.model_dump())
@@ -177,4 +182,14 @@ class Manager:
     def get_payment_by_id(self,session:Session,payment_id: int):
         return session.scalar(select(Payment).where(Payment.payment_id == payment_id))
 
-    
+    def create_users(self,user:UserCreate,session:Session):
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user    
+
+    def get_users_by_email(self,email,session:Session):
+        return session.scalars(select(Users).where(Users.email==email)).first()
+
+    def get_users_by_id(self,user_id,session:Session):
+        return session.scalar(select(Users).where(Users.user_id == user_id))

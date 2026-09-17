@@ -184,3 +184,10 @@ class Payment(Base):
     invoices: Mapped["Invoice"] = relationship(
         back_populates="payments"
     )
+
+class Users(Base):
+    __tablename__ = "users"
+    user_id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(String(100), nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(100), nullable=False)
+    role: Mapped[Role] = mapped_column(Enum(Role),native_enum=False, nullable=False)
